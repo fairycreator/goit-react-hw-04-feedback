@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import FeedbackOptions from './FeedbackOptions';
 import Statistics from './Statistics';
 import Section from './Section';
@@ -25,60 +25,56 @@ const resources = {
   loveEmojiUrl: 'https://assets.ccbp.in/frontend/react-js/love-emoji-img.png',
 };
 
-class App extends Component {
-  state = {
+const App = () => {
+  const [feedbackCounts, setFeedbackCounts] = useState({
     good: 0,
     neutral: 0,
     bad: 0,
-  };
+  });
 
-  handleLeaveFeedback = feedbackType => {
-    this.setState(prevState => ({
-      [feedbackType]: prevState[feedbackType] + 1,
+  const handleLeaveFeedback = feedbackType => {
+    setFeedbackCounts(prevFeedbackCounts => ({
+      ...prevFeedbackCounts,
+      [feedbackType]: prevFeedbackCounts[feedbackType] + 1,
     }));
   };
 
-  countTotalFeedback = () => {
-    const { good, neutral, bad } = this.state;
+  const countTotalFeedback = () => {
+    const { good, neutral, bad } = feedbackCounts;
     return good + neutral + bad;
   };
 
-  countPositiveFeedbackPercentage = () => {
-    const { good } = this.state;
-    const totalFeedback = this.countTotalFeedback();
+  const countPositiveFeedbackPercentage = () => {
+    const { good } = feedbackCounts;
+    const totalFeedback = countTotalFeedback();
     if (totalFeedback === 0) return 0;
     return Math.round((good / totalFeedback) * 100);
   };
 
-  render() {
-    const { good, neutral, bad } = this.state;
-    const totalFeedback = this.countTotalFeedback();
-    const totalPercentage = this.countPositiveFeedbackPercentage();
-    const feedbackOptions = Object.keys(this.state);
+  const feedbackOptions = Object.keys(feedbackCounts);
 
-    return (
-      <div className="bg-container">
-        <div className="sub-container">
-          <Section className="section-title" title="Please leave feedback">
-            <FeedbackOptions
-              options={feedbackOptions}
-              onLeaveFeedback={this.handleLeaveFeedback}
-              resources={resources}
-            />
-          </Section>
-          <Section title="Feedback Statistics">
-            <Statistics
-              good={good}
-              neutral={neutral}
-              bad={bad}
-              total={totalFeedback}
-              positivePercentage={totalPercentage}
-            />
-          </Section>
-        </div>
+  return (
+    <div className="bg-container">
+      <div className="sub-container">
+        <Section className="section-title" title="Please leave feedback">
+          <FeedbackOptions
+            options={feedbackOptions}
+            onLeaveFeedback={handleLeaveFeedback}
+            resources={resources}
+          />
+        </Section>
+        <Section title="Feedback Statistics">
+          <Statistics
+            good={feedbackCounts.good}
+            neutral={feedbackCounts.neutral}
+            bad={feedbackCounts.bad}
+            total={countTotalFeedback()}
+            positivePercentage={countPositiveFeedbackPercentage()}
+          />
+        </Section>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 
 export default App;
